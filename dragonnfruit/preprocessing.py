@@ -9,6 +9,7 @@ import pandas
 import pyBigWig
 
 import collections
+from itertools import zip_longest
 
 from tqdm import tqdm
 from scipy.sparse import csc_matrix
@@ -511,8 +512,8 @@ def extract_fragments(fragments, chrom_sizes, chroms=None, include_cells=None,
 		end_offset=end_offset,
 		tqdm_position=i,
 		verbose=verbose) 
-	for i, filename, _include, _exclude, prefix in zip(range(n_files), 
-		fragments, _include_cells, _exclude_cells, cell_name_prefixes)
+	for i, filename, _include, _exclude, prefix in zip_longest(range(n_files), 
+		fragments, _include_cells, _exclude_cells, cell_name_prefixes, fillvalue='')
 	)
 
 	# Create a dictionary for the reads
