@@ -695,24 +695,20 @@ def preprocess_sparse_atac(X_cscs, peaks, chroms, n_components=50,
 	return peak_counts, X_pca, neighbors
 
 
-def create_pseudobulks(X_index, row_index, output_filename, chroms=None):
+def create_pseudobulks(reads, output_filename, chrom_sizes, chroms=None):
 	""" do not use or your computer will die."""
 
-	chrom_set = self.chrom_sizes.keys() if chroms is None else set(chroms)
-	header = list(self.chrom_sizes.items())
+	chrom_set = chrom_sizes.keys() if chroms is None else set(chroms)
+	header = list(chrom_sizes.items())
 
 	# Create the bigwig to save a pseudobulk
 	bw = pyBigWig.open(output_filename, "w")
 	bw.addHeader(header, maxZooms=0)
 	for chrom in chroms:
-		X_csc = reads[chrom]
-
 		# Sum across cells to produce the pseudobulk
-		X_bulk = X_csc.astype('float32').sum(axis=0)
+		X_bulk = reads[chrom].astype('float32').sum(axis=0)
 		X_bulk = numpy.array(X_bulk)[0]
 
 		# Add to the bigwig
 		bw.addEntries(chrom, 0, values=X_bulk, step=1, span=1)
-		del X_csc
-
 	bw.close()
