@@ -596,8 +596,8 @@ def extract_cellxpeak(X, peaks, chroms=None, verbose=False):
 
 	if isinstance(peaks, str):
 		names = 'chrom', 'start', 'end'
-		peaks = pandas.read_csv(peaks, sep="\t", names=names, 
-			usecols=(0, 1, 2))
+		peaks = pandas.read_csv(peaks, sep="\t", header=None, comment='#',names=names, 
+				usecols=(0, 1, 2))
 	
 	if chroms is None:
 		chroms = set(list(numpy.unique(peaks['chrom'])))
