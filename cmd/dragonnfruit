@@ -12,9 +12,6 @@ import torch
 import pyfaidx
 import argparse
 
-import h5py
-import hdf5plugin
-
 import scipy
 from scipy import sparse
 
@@ -24,6 +21,8 @@ from dragonnfruit.preprocessing import preprocess_sparse_atac
 from dragonnfruit.io import extract_fasta
 from dragonnfruit.io import LocusGenerator
 from dragonnfruit.io import GenomewideGenerator
+from dragonnfruit.io import save_data
+from dragonnfruit.io import load_data
 
 from dragonnfruit.models import CellStateController
 from dragonnfruit.models import DynamicBPNet
@@ -273,44 +272,6 @@ default_pipeline_parameters = {
 ###
 # Commands
 ###
-
-
-def save_data(filename, X):
-	outfile = h5py.File(filename, 'w')
-
-	for chrom, data in X.items():
-		outfile.create_dataset(chrom + "_data", data=data.data, 
-			**hdf5plugin.Blosc(clevel=9))
-		outfile.create_dataset(chrom + "_indices", data=data.indices,
-			**hdf5plugin.Blosc(clevel=9))
-		outfile.create_dataset(chrom + "_indptr", data=data.indptr,
-			**hdf5plugin.Blosc(clevel=9))
-		outfile.create_dataset(chrom + "_dims", data=numpy.array(data.shape))
-
-	outfile.close()
-
-
-def load_data(filename):
-	X = {}
-	infile = h5py.File(filename, 'r')
-	
-	chroms = set()
-	for chrom in infile.keys():
-		chrom = '_'.join(chrom.split("_")[:-1])
-		if chrom not in chroms:
-			chroms.add(chrom)
-	
-	for chrom in chroms:
-		data = infile[chrom + "_data"]
-		indices = infile[chrom + "_indices"]
-		indptr = infile[chrom + "_indptr"]
-		dims = infile[chrom + "_dims"]
-	
-		X_csc = scipy.sparse.csc_matrix((data, indices, indptr), shape=dims)
-		X[chrom] = X_csc
-	
-	return X
-
 
 
 def merge_parameters(parameters, default_parameters):

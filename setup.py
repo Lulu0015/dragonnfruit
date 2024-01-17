@@ -16,6 +16,8 @@ setup(
         "pandas >= 1.3.3",
         "pyBigWig >= 0.3.17",
         "torch >= 1.9.0",
-        "tables >= 3.8.0"
+        "tables >= 3.8.0",
+        "h5py >= 3.10.0",
+        "hdf5plugin >= 4.3.0"       
     ],
 )

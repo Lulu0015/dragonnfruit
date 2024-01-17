@@ -8,8 +8,54 @@ import torch
 import pandas
 import pyfaidx
 
+import h5py
+import hdf5plugin
+import numpy as np
+
 from bpnetlite.io import one_hot_encode
 from joblib import Parallel, delayed
+
+def save_data(filename, X):
+    """
+    Save data to an HDF5 file.
+
+    Args:
+        filename (str): The name of the HDF5 file.
+        X (dict): A dictionary of sparse matrices to save.
+    """
+    # Open an HDF5 file in write mode
+    outfile = h5py.File(filename, 'w')
+
+    for chrom, data in X.items():
+        # Create datasets for data, indices, indptr, and dims
+        outfile.create_dataset(chrom + "_data", data=data.data, **hdf5plugin.Blosc(clevel=9))
+        outfile.create_dataset(chrom + "_indices", data=data.indices, **hdf5plugin.Blosc(clevel=9))
+        outfile.create_dataset(chrom + "_indptr", data=data.indptr, **hdf5plugin.Blosc(clevel=9))
+        outfile.create_dataset(chrom + "_dims", data=np.array(data.shape))
+
+    # Close the HDF5 file
+    outfile.close()
+    
+def load_data(filename):
+	X = {}
+	infile = h5py.File(filename, 'r')
+	
+	chroms = set()
+	for chrom in infile.keys():
+		chrom = '_'.join(chrom.split("_")[:-1])
+		if chrom not in chroms:
+			chroms.add(chrom)
+	
+	for chrom in chroms:
+		data = infile[chrom + "_data"]
+		indices = infile[chrom + "_indices"]
+		indptr = infile[chrom + "_indptr"]
+		dims = infile[chrom + "_dims"]
+	
+		X_csc = scipy.sparse.csc_matrix((data, indices, indptr), shape=dims)
+		X[chrom] = X_csc
+	
+	return X
 
 def extract_fasta(filename, chroms, n_jobs=-1):
 	"""Extract and one-hot encode chromosomes from a FASTA file in parallel.
