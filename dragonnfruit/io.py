@@ -217,7 +217,7 @@ class LocusGenerator(torch.utils.data.Dataset):
 		loci = []
 		names = ['chrom', 'start', 'end']
 		for filename in loci_file:
-			loci_ = pandas.read_csv(filename, sep='\t', usecols=[0, 1, 2], 
+			loci_ = pandas.read_csv(filename, sep='\t', comment='#', usecols=[0, 1, 2], 
 				header=None, index_col=False, names=names)
 			loci_['mid'] = (loci_['end'] - loci_['start']) // 2 + loci_['start']
 			loci_ = loci_[numpy.isin(loci_['chrom'], chroms)]
