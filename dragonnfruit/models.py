@@ -322,6 +322,10 @@ class DragoNNFruit(torch.nn.Module):
 		start, best_corr = time.time(), 0
 		self.logger.start()
 		for epoch in range(max_epochs):
+      
+			total_valid_loss = 0
+			valid_iterations = 0
+
 			for i, (X, y, cell_states, read_depths) in enumerate(training_data):
 				X = X.cuda().type(torch.float32)
 				y = y.cuda()
@@ -369,6 +373,14 @@ class DragoNNFruit(torch.nn.Module):
 
 					start = time.time()
 					torch.save(self, "{}.{}.torch".format(self.name, epoch))
+
+				total_valid_loss += valid_loss.item()
+				valid_iterations += 1
+			# Calculate and report average validation loss for the epoch
+			if valid_iterations > 0:
+				avg_valid_loss = total_valid_loss / valid_iterations
+				if verbose:
+					print(f"Epoch {epoch}: Average Validation Loss = {avg_valid_loss}")
 
 
 class DynamicBPNet(torch.nn.Module):
